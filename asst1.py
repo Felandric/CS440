@@ -1,10 +1,10 @@
 from graphics import *
 import random
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 #initialize RNG
-random.seed(12345)
+random.seed(12346)
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -67,7 +67,7 @@ for g in range(50):
             if (posy - 1 > -1) and prev != UP and (grid[posx][posy - 1] == UNVISITED):
                 dirs.append(DOWN)
             
-            if not dirs:
+            if not dirs: #check if directions are available
                 posx, posy = unblocked.pop()
                 prev = None 
             else: 
@@ -124,13 +124,19 @@ for g in range(50):
                 if grid[x][y] == UNVISITED:
                     unvisited.append((x,y))
     
+    grid[0][0] = UNBLOCKED #set goal and start to be unblocked
+    grid[100][100] = UNBLOCKED
+    
     for row in grid:
         for val in row:
             file.write("%d" % val)
         file.write("\n")    
     file.close()   
-    
+   
     if draw:
+        pos = Rectangle(Point(100, 100), Point(101, 101))
+        pos.setFill("red")
+        pos.draw(win)
         win.getMouse()
         win.close()
     

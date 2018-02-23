@@ -15,8 +15,25 @@ LEFT = 1
 UP = 2
 DOWN = 3
 
-#create array of values and draw grid
-            
+class State:
+    def __init__(self, posx, posy, g):
+        self.posx = posx
+        self.posy = posy
+        self.g = g
+        self.h = (100 - posx) + (100 - posy)
+        if g == INF:
+            self.f = INF
+        else:
+            self.f = g + self.h
+        self.treepointer = None
+
+    def setg(self, g):
+        self.g = g
+        if g == INF:
+            self.f = INF
+        else:
+            self.f = g + self.h
+
 for g in range(50):
     filename = "%d.txt"%g
     file = open(filename, 'r')
@@ -37,90 +54,107 @@ for g in range(50):
                 pos.draw(win)
         file.read(1)
     file.close()
-      
-    naivegrid = list()  
+
+    naivegrid = list()
     for x in range(101):
         naivegrid.append(list())
         for y in range(101):
             naivegrid[x].append(UNVISITED)
-            
-    posx, posy = 0,0 #initialize at 0,0, overwrite blocked if blocked
-    unblocked = list()
-    unblocked.append((posx,posy))
-        
-    prev = None #keep track of last move in order not to check that direction
-    while unblocked:
-        
-        if draw:
-            pos = Rectangle(Point(posx, posy), Point(posx + 1, posy + 1))
-            pos.setFill("white")
-            pos.draw(win)
-        
-        dirs = list() #possible directions to move 0=right, 1=left, 2=up, 3=down
 
-        if (posx + 1 < 101) and prev != LEFT and (grid[posx + 1][posy] == UNVISITED): #check for walls and avoid backtracking
-            dirs.append(RIGHT)
+    searchgrid = list()
+    OPEN = list()
+    INF = -1
+    COST = 1
+    start = State(0, 0, 0) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
+    goal = State(100, 100, INF)
 
-        if (posx - 1 > -1) and prev != RIGHT and (grid[posx - 1][posy] == UNVISITED):
-            dirs.append(LEFT)
-                   
-        if (posy + 1 < 101) and prev != DOWN and (grid[posx][posy + 1] == UNVISITED):
-            dirs.append(UP)
-   
-        if (posy - 1 > -1) and prev != UP and (grid[posx][posy - 1] == UNVISITED):
-            dirs.append(DOWN)
-        
-        if not dirs:
-            posx, posy = unblocked.pop()
-            prev = None 
-        else: 
-            pos = None
-            blocked = None
-            if random.randrange(0,10) < 3:
-                blocked = True
+    pos = Rectangle(Point(goal.posx, goal.posy), Point(goal.posx + 1, goal.posy + 1))
+    pos.setFill("red")
+    pos.draw(win)
+
+    def ComputePath():
+        searchgrid = list()
+        for x in range(101):
+            searchgrid.append(list())
+            for y in range(101):
+                searchgrid[x].append(None)
+
+        prev = None
+        searchgrid[goal.posx][goal.posy] = goal
+        while OPEN and (searchgrid[goal.posx][goal.posy].g == INF or searchgrid[goal.posx][goal.posy].g > OPEN[0].f):
+            current = OPEN.pop(0)
+            succs = list()
+            searchgrid[current.posx][current.posy] = current
+            if current.posx + 1 < 101 and prev != LEFT and naivegrid[current.posx + 1][current.posy] != BLOCKED:
+                if searchgrid[current.posx + 1][current.posy] == None:
+                    searchgrid[current.posx + 1][current.posy] = State(current.posx + 1, current.posy, INF)
+                succs.append(searchgrid[current.posx + 1][current.posy])
+
+            if current.posx - 1 > -1 and prev != RIGHT and naivegrid[current.posx - 1][current.posy] != BLOCKED:
+                if searchgrid[current.posx - 1][current.posy] == None:
+                    searchgrid[current.posx - 1][current.posy] = State(current.posx - 1, current.posy, INF)
+                succs.append(searchgrid[current.posx - 1][current.posy])
+
+            if current.posy + 1 < 101 and prev != DOWN and naivegrid[current.posx][current.posy + 1] != BLOCKED:
+                if searchgrid[current.posx][current.posy + 1] == None:
+                    searchgrid[current.posx][current.posy + 1] = State(current.posx, current.posy + 1, INF)
+                succs.append(searchgrid[current.posx][current.posy + 1])
+
+            if current.posy - 1 > -1 and prev != UP and naivegrid[current.posx][current.posy - 1] != BLOCKED:
+                if searchgrid[current.posx][current.posy - 1] == None:
+                    searchgrid[current.posx][current.posy - 1] = State(current.posx, current.posy - 1, INF)
+                succs.append(searchgrid[current.posx][current.posy - 1])
+
+            for state in succs:
+                if state.g == INF or state.g > current.g + COST:
+                    state.setg(current.g + COST)
+                    state.treepointer = current
+                    if state in OPEN:
+                        OPEN.remove(state)
+                    if not OPEN:
+                        OPEN.insert(0, state)
+                    else:
+                        endoflist = True
+                        for s in OPEN:
+                            if state.f < s.f:
+                                OPEN.insert(OPEN.index(s), state)
+                                endoflist = False
+                                break
+                        if endoflist:
+                            OPEN.append(state)
+                         #   elif:
+                                #break ties
+        return searchgrid[goal.posx][goal.posy]
+
+    reached = False
+    while not reached:
+        OPEN = list()
+        OPEN.append(start)
+        goal.setg(INF)
+        treenode = ComputePath()
+        if not OPEN:
+            print("The target is not reachable.")
+            break
+        path = list()
+        counter = 0
+        path.insert(0, treenode)
+        while (treenode.posx != start.posx or treenode.posy != start.posy):
+            path.insert(0, treenode.treepointer)
+            treenode = treenode.treepointer
+        for node in path:
+            if grid[node.posx][node.posy] == BLOCKED:
+                start = path[path.index(node) - 1]
+                start = State(start.posx, start.posy, 0)
+                naivegrid[node.posx][node.posy] = BLOCKED
+                break
             else:
-                blocked = False 
-                unblocked.append((posx, posy))
-                prev = dir
-                
-            dir = random.choice(dirs) #0=right, 1=left, 2=up, 3=down
-            if dir == RIGHT:
-                if blocked:
-                    grid[posx + 1][posy] = BLOCKED
-                    if draw:
-                        pos = Rectangle(Point(posx + 1, posy), Point(posx + 2, posy + 1))
-                else:                 
-                    posx += 1
-                    
-            elif dir == LEFT:
-                if blocked:
-                    grid[posx - 1][posy] = BLOCKED
-                    if draw:
-                        pos = Rectangle(Point(posx - 1, posy), Point(posx, posy + 1))
-                else:
-                    posx -= 1
-                    
-            elif dir == UP:
-                if blocked:
-                    grid[posx][posy + 1] = BLOCKED
-                    if draw:
-                        pos = Rectangle(Point(posx, posy + 1), Point(posx + 1, posy + 2))
-                else:
-                    posy += 1
-            
-            else:
-                if blocked:
-                    grid[posx][posy - 1] = BLOCKED
-                    if draw:
-                        pos = Rectangle(Point(posx, posy - 1), Point(posx + 1, posy))
-                else:
-                    posy -= 1
-            if blocked and draw: 
-                pos.setFill("black")
+                naivegrid[node.posx][node.posy] = UNBLOCKED
+                pos = Rectangle(Point(node.posx, node.posy), Point(node.posx + 1, node.posy + 1))
+                pos.setFill("blue")
                 pos.draw(win)
+                if node.posx == goal.posx and node.posy == goal.posy:
+                    print("Target reached.")
+                    reached = True
 
-'''  
-    if draw:
-        win.getMouse()
-        win.close()
-    
+    win.getMouse()
+    win.close()
