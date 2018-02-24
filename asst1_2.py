@@ -3,9 +3,6 @@ import random
 
 draw = True #set whether or not to draw the grid
 
-#initialize RNG
-random.seed(12345)
-
 UNVISITED = 0
 UNBLOCKED = 1
 BLOCKED = 2
@@ -68,9 +65,10 @@ for g in range(50):
     start = State(0, 0, 0) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
     goal = State(100, 100, INF)
 
-    pos = Rectangle(Point(goal.posx, goal.posy), Point(goal.posx + 1, goal.posy + 1))
-    pos.setFill("red")
-    pos.draw(win)
+    if draw:
+        pos = Rectangle(Point(goal.posx, goal.posy), Point(goal.posx + 1, goal.posy + 1))
+        pos.setFill("red")
+        pos.draw(win)
 
     def ComputePath():
         searchgrid = list()
@@ -85,7 +83,7 @@ for g in range(50):
             current = OPEN.pop(0)
             succs = list()
             searchgrid[current.posx][current.posy] = current
-            if current.posx + 1 < 101 and prev != LEFT and naivegrid[current.posx + 1][current.posy] != BLOCKED:
+            if current.posx + 1 < 101 and prev != LEFT and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
                 if searchgrid[current.posx + 1][current.posy] == None:
                     searchgrid[current.posx + 1][current.posy] = State(current.posx + 1, current.posy, INF)
                 succs.append(searchgrid[current.posx + 1][current.posy])
@@ -120,10 +118,20 @@ for g in range(50):
                                 OPEN.insert(OPEN.index(s), state)
                                 endoflist = False
                                 break
+                            elif state.f == s.f: #break ties
+                                if state.g > s.g: #lower g wins
+                                    OPEN.insert(OPEN.index(s), state)
+                                elif state.g < s.g:
+                                    OPEN.insert(OPEN.index(s) + 1, state)
+                                else: #if equal g, randomize
+                                    if random.randrange(0, 2) == 0:
+                                        OPEN.insert(OPEN.index(s), state)
+                                    else:
+                                        OPEN.insert(OPEN.index(s) + 1, state)
+                                break
                         if endoflist:
                             OPEN.append(state)
-                         #   elif:
-                                #break ties
+
         return searchgrid[goal.posx][goal.posy]
 
     reached = False
@@ -149,12 +157,13 @@ for g in range(50):
                 break
             else:
                 naivegrid[node.posx][node.posy] = UNBLOCKED
-                pos = Rectangle(Point(node.posx, node.posy), Point(node.posx + 1, node.posy + 1))
-                pos.setFill("blue")
-                pos.draw(win)
+                if draw:
+                    pos = Rectangle(Point(node.posx, node.posy), Point(node.posx + 1, node.posy + 1))
+                    pos.setFill("blue")
+                    pos.draw(win)
                 if node.posx == goal.posx and node.posy == goal.posy:
                     print("Target reached.")
                     reached = True
-
-    win.getMouse()
-    win.close()
+    if draw:
+        win.getMouse()
+        win.close()
