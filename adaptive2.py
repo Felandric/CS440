@@ -146,6 +146,7 @@ for g in range(50):
     reached = False
     while not reached:
         OPEN = list()
+        CLOSED = list()
         OPEN.append(start)
         goal.setg(INF)
         goal.treepointer = None
