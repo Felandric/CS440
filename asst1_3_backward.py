@@ -8,6 +8,8 @@ UNVISITED = 0
 UNBLOCKED = 1
 BLOCKED = 2
 
+INF = -1
+
 RIGHT = 0
 LEFT = 1
 UP = 2
@@ -76,7 +78,6 @@ for gd in range(50):
             searchgrid[x].append(None)
             
     OPEN = list()
-    INF = -1
     COST = 1
     start = State(0, 0, INF) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
     goal = State(100, 100, 0)

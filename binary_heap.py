@@ -1,18 +1,21 @@
-import random
-from functools import total_ordering
-
 class MinBinaryHeap:
   def __init__(self):
-    self.array = [0] * 100
+    self.array = [None] * 100
     self.count = 0
-
+    
+  def __bool__(self):
+    return self.count <= 0
+    
   def add(self, element):
     if self.count == len(self.array):
-      self.array += [0] * len(self.array)
+      self.array += [None] * len(self.array)
     self.array[self.count] = element
     self.shift_up(self.count)
     self.count += 1
 
+  def peek(self):
+    return self.array[0]
+  
   @staticmethod
   def get_parent(n):
     if n != 0:
@@ -47,7 +50,7 @@ class MinBinaryHeap:
           self.swap_elements(index, left_child)
           self.shift_down(left_child)
 
-  def remove_min(self):
+  def pop(self):
     if self.count < 0:
       self.count = 0
       return 0
@@ -61,45 +64,3 @@ class MinBinaryHeap:
     while i >= 0:
       self.shift_down(i)
       i -= 1
-
-  def is_empty(self):
-    return self.count <= 0
-
-@total_ordering
-class GraphEdge:
-  def __init__(self, edge, weight):
-    self.edge = edge
-    self.weight = weight
-
-  def __eq__(self, other_edge):
-    return self.weight == other_edge.weight
-
-  def __lt__(self, other_edge):
-    return self.weight < other_edge.weight
-
-  def __str__(self):
-    return str(self.edge) + " " + str(self.weight)
-
-successes = []
-for c in range(10):
-  h = MinBinaryHeap()
-  for i in range(0, 20):
-    h.add(GraphEdge(random.randint(1,10), random.randint(1, 100)))
-
-  a = []
-  while not h.is_empty():
-    m = h.remove_min()
-    print m
-    a.append(m)
-  print "-" * 20
-
-  if sorted(a) != a:
-    print 'Failure :('
-    exit
-
-print 'Success!'
-
-# if all([successes[s] for s in xrange(len(successes) - 1)]):
-#   print 'Success!'
-# else:
-#   print 'Failure :('

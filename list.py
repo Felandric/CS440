@@ -1,4 +1,4 @@
-a = list()
-a.insert(0,1)
-a.insert(2,2)
+import heapq
+a = [1] * 5
+a.append(5)
 print(a)
