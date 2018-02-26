@@ -127,8 +127,6 @@ for gd in range(50):
                 if state.g == INF or state.g > current.g + COST:
                     state.setg(current.g + COST)
                     state.treepointer = current
-                    if state in OPEN.array:
-                        OPEN.shift_up(OPEN.array.index(state))
                     OPEN.add(state)
     
     reached = False
