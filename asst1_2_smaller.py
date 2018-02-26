@@ -77,28 +77,26 @@ for g in range(50):
             for y in range(101):
                 searchgrid[x].append(None)
 
-        prev = None
         searchgrid[goal.posx][goal.posy] = goal
-        while OPEN and (searchgrid[goal.posx][goal.posy].g == INF or searchgrid[goal.posx][goal.posy].g > OPEN[0].f):
+        while OPEN and (goal.g == INF or goal.g > OPEN[0].f):
             current = OPEN.pop(0)
             succs = list()
-            searchgrid[current.posx][current.posy] = current
-            if current.posx + 1 < 101 and prev != LEFT and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
+            if current.posx + 1 < 101 and (current.treepointer == None or current.treepointer.posx != current.posx + 1) and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
                 if searchgrid[current.posx + 1][current.posy] == None:
                     searchgrid[current.posx + 1][current.posy] = State(current.posx + 1, current.posy, INF)
                 succs.append(searchgrid[current.posx + 1][current.posy])
 
-            if current.posx - 1 > -1 and prev != RIGHT and naivegrid[current.posx - 1][current.posy] != BLOCKED:
+            if current.posx - 1 > -1 and (current.treepointer == None or current.treepointer.posx != current.posx - 1) and naivegrid[current.posx - 1][current.posy] != BLOCKED:
                 if searchgrid[current.posx - 1][current.posy] == None:
                     searchgrid[current.posx - 1][current.posy] = State(current.posx - 1, current.posy, INF)
                 succs.append(searchgrid[current.posx - 1][current.posy])
 
-            if current.posy + 1 < 101 and prev != DOWN and naivegrid[current.posx][current.posy + 1] != BLOCKED:
+            if current.posy + 1 < 101 and (current.treepointer == None or current.treepointer.posy != current.posy + 1) and naivegrid[current.posx][current.posy + 1] != BLOCKED:
                 if searchgrid[current.posx][current.posy + 1] == None:
                     searchgrid[current.posx][current.posy + 1] = State(current.posx, current.posy + 1, INF)
                 succs.append(searchgrid[current.posx][current.posy + 1])
 
-            if current.posy - 1 > -1 and prev != UP and naivegrid[current.posx][current.posy - 1] != BLOCKED:
+            if current.posy - 1 > -1 and (current.treepointer == None or current.treepointer.posy != current.posy - 1) and naivegrid[current.posx][current.posy - 1] != BLOCKED:
                 if searchgrid[current.posx][current.posy - 1] == None:
                     searchgrid[current.posx][current.posy - 1] = State(current.posx, current.posy - 1, INF)
                 succs.append(searchgrid[current.posx][current.posy - 1])
@@ -119,32 +117,32 @@ for g in range(50):
                                 endoflist = False
                                 break
                             elif state.f == s.f: #break ties
-                                if state.g > s.g: #lower g wins
+                                if state.g < s.g: #lower g wins
                                     OPEN.insert(OPEN.index(s), state)
-                                elif state.g < s.g:
+                                elif state.g > s.g:
                                     OPEN.insert(OPEN.index(s) + 1, state)
                                 else: #if equal g, randomize
                                     if random.randrange(0, 2) == 0:
                                         OPEN.insert(OPEN.index(s), state)
                                     else:
                                         OPEN.insert(OPEN.index(s) + 1, state)
+                                endoflist = False
                                 break
                         if endoflist:
                             OPEN.append(state)
-
-        return searchgrid[goal.posx][goal.posy]
 
     reached = False
     while not reached:
         OPEN = list()
         OPEN.append(start)
         goal.setg(INF)
-        treenode = ComputePath()
+        goal.treepointer = None
+        ComputePath()
         if not OPEN:
             print("The target is not reachable.")
             break
+        treenode = goal
         path = list()
-        counter = 0
         path.insert(0, treenode)
         while (treenode.posx != start.posx or treenode.posy != start.posy):
             path.insert(0, treenode.treepointer)

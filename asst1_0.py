@@ -4,7 +4,7 @@ import random
 draw = False #set whether or not to draw the grid
 
 #initialize RNG
-random.seed(12346)
+random.seed(12340)
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -15,6 +15,7 @@ LEFT = 1
 UP = 2
 DOWN = 3
 
+SIZE = 101 #length of one side of square grid
 #create array of values and draw grid
             
 for g in range(50):
@@ -24,17 +25,17 @@ for g in range(50):
     #initialize grid
     if draw:
         win = GraphWin('Grid', 510, 510)
-        win.setCoords(0.0, 0.0, 101.0, 101.0)
+        win.setCoords(0.0, 0.0, float(SIZE), float(SIZE))
         win.setBackground("gray")
     grid = list()
-    for x in range(101):
+    for x in range(SIZE):
         grid.append(list())
-        for y in range(101):
+        for y in range(SIZE):
             grid[x].append(UNVISITED)
 
     unvisited = list()
-    for x in range(101):
-        for y in range(101):
+    for x in range(SIZE):
+        for y in range(SIZE):
             if grid[x][y] == UNVISITED:
                 unvisited.append((x,y))
                 
@@ -55,13 +56,13 @@ for g in range(50):
             
             dirs = list() #possible directions to move 0=right, 1=left, 2=up, 3=down
 
-            if (posx + 1 < 101) and prev != LEFT and (grid[posx + 1][posy] == UNVISITED): #check for walls and avoid backtracking
+            if (posx + 1 < SIZE) and prev != LEFT and (grid[posx + 1][posy] == UNVISITED): #check for walls and avoid backtracking
                 dirs.append(RIGHT)
 
             if (posx - 1 > -1) and prev != RIGHT and (grid[posx - 1][posy] == UNVISITED):
                 dirs.append(LEFT)
                        
-            if (posy + 1 < 101) and prev != DOWN and (grid[posx][posy + 1] == UNVISITED):
+            if (posy + 1 < SIZE) and prev != DOWN and (grid[posx][posy + 1] == UNVISITED):
                 dirs.append(UP)
        
             if (posy - 1 > -1) and prev != UP and (grid[posx][posy - 1] == UNVISITED):
@@ -119,13 +120,13 @@ for g in range(50):
             
         del unvisited
         unvisited = list()
-        for x in range(101):
-            for y in range(101):
+        for x in range(SIZE):
+            for y in range(SIZE):
                 if grid[x][y] == UNVISITED:
                     unvisited.append((x,y))
     
     grid[0][0] = UNBLOCKED #set goal and start to be unblocked
-    grid[100][100] = UNBLOCKED
+    grid[SIZE - 1][SIZE - 1] = UNBLOCKED
     
     for row in grid:
         for val in row:
@@ -134,7 +135,7 @@ for g in range(50):
     file.close()   
    
     if draw:
-        pos = Rectangle(Point(100, 100), Point(101, 101))
+        pos = Rectangle(Point(SIZE - 1, SIZE - 1), Point(SIZE, SIZE))
         pos.setFill("red")
         pos.draw(win)
         win.getMouse()
