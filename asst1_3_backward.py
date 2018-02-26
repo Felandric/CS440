@@ -1,8 +1,9 @@
 from graphics import *
 import random
 import time
+from binary_heap import *
 
-draw = False #set whether or not to draw the grid
+draw = True #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -27,6 +28,18 @@ class State:
             self.f = g + self.h
         self.treepointer = None
 
+    def __lt__(self, other):
+        if self.f != other.f:
+            return self.f < other.f
+        elif self.f == other.f:
+            if self.g != other.g:
+                return self.g > other.g
+            else:
+                if random.randrange(0,2) == 0:
+                    return True
+                else:
+                    return False    
+    
     def setg(self, g):
         self.g = g
         if g == INF:
@@ -77,7 +90,7 @@ for gd in range(50):
         for y in range(101):
             searchgrid[x].append(None)
             
-    OPEN = list()
+    OPEN = MinBinaryHeap()
     COST = 1
     start = State(0, 0, INF) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
     goal = State(100, 100, 0)
@@ -93,8 +106,8 @@ for gd in range(50):
                 searchgrid[x][y] = None
 
         searchgrid[start.posx][start.posy] = start
-        while OPEN and (searchgrid[start.posx][start.posy].g == INF or searchgrid[start.posx][start.posy].g > OPEN[0].f):
-            current = OPEN.pop(0)
+        while OPEN and (start.g == INF or start.g > OPEN.peek().f):
+            current = OPEN.pop()
             succs = list()
             if current.posx + 1 < 101 and (current.treepointer == None or current.treepointer.posx != current.posx + 1) and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
                 if searchgrid[current.posx + 1][current.posy] == None:
@@ -124,39 +137,15 @@ for gd in range(50):
                 if state.g == INF or state.g > current.g + COST:
                     state.setg(current.g + COST)
                     state.treepointer = current
-                    if state in OPEN:
-                        OPEN.remove(state)
-                    if not OPEN:
-                        OPEN.insert(0, state)
-                    else:
-                        endoflist = True
-                        for s in OPEN:
-                            if state.f < s.f:
-                                OPEN.insert(OPEN.index(s), state)
-                                endoflist = False
-                                break
-                            elif state.f == s.f: #break ties
-                                if state.g > s.g: #larger g wins
-                                    OPEN.insert(OPEN.index(s), state)
-                                elif state.g < s.g:
-                                    OPEN.insert(OPEN.index(s) + 1, state)
-                                else: #if equal g, randomize
-                                    if random.randrange(0, 2) == 0:
-                                        OPEN.insert(OPEN.index(s), state)
-                                    else:
-                                        OPEN.insert(OPEN.index(s) + 1, state)
-                                endoflist = False
-                                break
-                        if endoflist:
-                            OPEN.append(state)
+                    OPEN.add(state)
 
         return searchgrid[start.posx][start.posy]
 
     reached = False
     starttime = time.time()
     while not reached:
-        OPEN = list()
-        OPEN.append(goal)
+        OPEN = MinBinaryHeap()
+        OPEN.add(goal)
         goal.seth(start.posx, start.posy)
         treenode = ComputePath()
         if not OPEN:

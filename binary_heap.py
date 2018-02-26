@@ -1,17 +1,20 @@
 class MinBinaryHeap:
   def __init__(self):
-    self.array = [None] * 100
+    self.array = [None] * 1000
     self.count = 0
     
   def __bool__(self):
-    return self.count <= 0
+    return self.count > 0
     
   def add(self, element):
-    if self.count == len(self.array):
-      self.array += [None] * len(self.array)
-    self.array[self.count] = element
-    self.shift_up(self.count)
-    self.count += 1
+    if element in self.array:
+        self.shift_up(self.array.index(element))
+    else:
+        if self.count == len(self.array):
+          self.array += [None] * len(self.array)
+        self.array[self.count] = element
+        self.shift_up(self.count)
+        self.count += 1
 
   def peek(self):
     return self.array[0]
@@ -19,7 +22,7 @@ class MinBinaryHeap:
   @staticmethod
   def get_parent(n):
     if n != 0:
-      return (n - 1) / 2
+      return int((n - 1) / 2)
     else:
       return -1
 
@@ -58,9 +61,3 @@ class MinBinaryHeap:
     self.swap_elements(0, self.count)
     self.shift_down(0)
     return self.array[self.count]
-
-  def build_heap(self):
-    i = self.count - 1
-    while i >= 0:
-      self.shift_down(i)
-      i -= 1

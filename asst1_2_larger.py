@@ -3,7 +3,7 @@ import random
 import time
 from binary_heap import *
 
-draw = False #set whether or not to draw the grid
+draw = True #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
