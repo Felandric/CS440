@@ -1,7 +1,8 @@
 from graphics import *
 import random
+import time
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -31,8 +32,11 @@ class State:
         else:
             self.f = g + self.h
 
-for g in range(50):
-    filename = "%d.txt"%g
+results = open("rfa_larger_g_results.txt", 'w')
+results.write("\tTime (s)\tReached Target\n")
+
+for gd in range(50):
+    filename = "%d.txt"%gd
     file = open(filename, 'r')
     print(filename)
     #initialize grid
@@ -136,6 +140,7 @@ for g in range(50):
                             OPEN.append(state)
 
     reached = False
+    starttime = time.time()
     while not reached:
         OPEN = list()
         OPEN.append(start)
@@ -166,6 +171,16 @@ for g in range(50):
                 if node.posx == goal.posx and node.posy == goal.posy:
                     print("Target reached.")
                     reached = True
+    endtime = time.time()
+    if reached:
+        rstring = "yes"
+    else:
+        rstring = "no"
+    
+    results.write("%d:\t%f\t%s\n"%(gd,(endtime-starttime), rstring))
+    
     if draw:
         win.getMouse()
         win.close()
+
+results.close()

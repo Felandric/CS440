@@ -1,7 +1,8 @@
 from graphics import *
 import random
+import time
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -34,9 +35,12 @@ class State:
     def seth(self, goalg):
         self.h = goalg - self.g
         self.f = self.g + self.h    
-
-for g in range(50):
-    filename = "%d.txt"%g
+        
+results = open("aa_results.txt", 'w')
+results.write("\tTime (s)\tReached Target\n") 
+        
+for gd in range(50):
+    filename = "%d.txt"%gd
     file = open(filename, 'r')
     print(filename)
     #initialize grid
@@ -144,6 +148,7 @@ for g in range(50):
         
         
     reached = False
+    starttime = time.time()
     while not reached:
         OPEN = list()
         CLOSED = list()
@@ -179,6 +184,16 @@ for g in range(50):
             state.seth(goal.g)
             state.setg(INF)
             state.treepointer = None
+    endtime = time.time()
+    if reached:
+        rstring = "yes"
+    else:
+        rstring = "no"
+    
+    results.write("%d:\t%f\t%s\n"%(gd,(endtime-starttime), rstring))        
+         
     if draw:
         win.getMouse()
         win.close()
+
+results.close()

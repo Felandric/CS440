@@ -1,7 +1,8 @@
 from graphics import *
 import random
+import time
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -33,13 +34,16 @@ class State:
             
     def seth(self, startx, starty):
         self.h = abs(self.posx - startx) + abs(self.posy - starty)
-        if g == INF:
+        if self.g == INF:
             self.f = INF
         else:
-            self.f = g + self.h
+            self.f = self.g + self.h
 
-for g in range(50):
-    filename = "%d.txt"%g
+results = open("rba_results.txt", 'w')
+results.write("\tTime (s)\tReached Target\n")            
+            
+for gd in range(50):
+    filename = "%d.txt"%gd
     file = open(filename, 'r')
     print(filename)
     #initialize grid
@@ -148,6 +152,7 @@ for g in range(50):
         return searchgrid[start.posx][start.posy]
 
     reached = False
+    starttime = time.time()
     while not reached:
         OPEN = list()
         OPEN.append(goal)
@@ -176,6 +181,16 @@ for g in range(50):
                 if node.posx == goal.posx and node.posy == goal.posy:
                     print("Target reached.")
                     reached = True
+    endtime = time.time()
+    if reached:
+        rstring = "yes"
+    else:
+        rstring = "no"
+    
+    results.write("%d:\t%f\t%s\n"%(gd,(endtime-starttime), rstring))
+    
     if draw:
         win.getMouse()
         win.close()
+
+results.close()
