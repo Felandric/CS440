@@ -59,6 +59,11 @@ for g in range(50):
             naivegrid[x].append(UNVISITED)
 
     searchgrid = list()
+    for x in range(101):
+        searchgrid.append(list())
+        for y in range(101):
+            searchgrid[x].append(None)
+            
     OPEN = list()
     INF = -1
     COST = 1
@@ -71,11 +76,9 @@ for g in range(50):
         pos.draw(win)
 
     def ComputePath():
-        searchgrid = list()
         for x in range(101):
-            searchgrid.append(list())
             for y in range(101):
-                searchgrid[x].append(None)
+                searchgrid[x][y] = None
 
         searchgrid[goal.posx][goal.posy] = goal
         while OPEN and (goal.g == INF or goal.g > OPEN[0].f):

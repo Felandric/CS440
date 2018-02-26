@@ -30,10 +30,10 @@ class State:
             self.f = INF
         else:
             self.f = g + self.h
-            
+    
     def seth(self, goalg):
         self.h = goalg - self.g
-        self.f = self.g + self.h
+        self.f = self.g + self.h    
 
 for g in range(50):
     filename = "%d.txt"%g
@@ -63,36 +63,38 @@ for g in range(50):
             naivegrid[x].append(UNVISITED)
 
     searchgrid = list()
+    for x in range(101):
+        searchgrid.append(list())
+        for y in range(101):
+            searchgrid[x].append(None)
     OPEN = list()
+    CLOSED = list()
     INF = -1
     COST = 1
     start = State(0, 0, 0) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
     goal = State(100, 100, INF)
-    prevgoalg = INF
-    
+
     if draw:
         pos = Rectangle(Point(goal.posx, goal.posy), Point(goal.posx + 1, goal.posy + 1))
         pos.setFill("red")
         pos.draw(win)
 
     def ComputePath():
-        searchgrid = list()
         for x in range(101):
-            searchgrid.append(list())
             for y in range(101):
-                searchgrid[x].append(None)
+                if searchgrid[x][y] not in CLOSED:
+                    searchgrid[x][y] = None
 
         searchgrid[goal.posx][goal.posy] = goal
-      #  print(OPEN[0].f)
-      #  print(goal.g)
         while OPEN and (goal.g == INF or goal.g > OPEN[0].f):
+            
             current = OPEN.pop(0)
+            if current not in CLOSED:
+                CLOSED.append(current)
             succs = list()
-            print(current.posx, current.posy)
-            print(goal.g)
             if current.posx + 1 < 101 and (current.treepointer == None or current.treepointer.posx != current.posx + 1) and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
                 if searchgrid[current.posx + 1][current.posy] == None:
-                    searchgrid[current.posx + 1][current.posy] = State(current.posx + 1, current.posy, INF)                   
+                    searchgrid[current.posx + 1][current.posy] = State(current.posx + 1, current.posy, INF)
                 succs.append(searchgrid[current.posx + 1][current.posy])
 
             if current.posx - 1 > -1 and (current.treepointer == None or current.treepointer.posx != current.posx - 1) and naivegrid[current.posx - 1][current.posy] != BLOCKED:
@@ -107,14 +109,12 @@ for g in range(50):
 
             if current.posy - 1 > -1 and (current.treepointer == None or current.treepointer.posy != current.posy - 1) and naivegrid[current.posx][current.posy - 1] != BLOCKED:
                 if searchgrid[current.posx][current.posy - 1] == None:
-                    searchgrid[current.posx][current.posy - 1] = State(current.posx, current.posy - 1, INF)                    
+                    searchgrid[current.posx][current.posy - 1] = State(current.posx, current.posy - 1, INF)
                 succs.append(searchgrid[current.posx][current.posy - 1])
 
             for state in succs:
                 if state.g == INF or state.g > current.g + COST:
                     state.setg(current.g + COST)
-                    if prevgoalg != INF and state != goal:
-                        state.seth(prevgoalg)
                     state.treepointer = current
                     if state in OPEN:
                         OPEN.remove(state)
@@ -140,8 +140,9 @@ for g in range(50):
                                 endoflist = False
                                 break
                         if endoflist:
-                            OPEN.append(state)       
-
+                            OPEN.append(state)
+        
+        
     reached = False
     while not reached:
         OPEN = list()
@@ -149,7 +150,6 @@ for g in range(50):
         goal.setg(INF)
         goal.treepointer = None
         ComputePath()
-        prevgoalg = goal.g
         if not OPEN:
             print("The target is not reachable.")
             break
@@ -163,7 +163,6 @@ for g in range(50):
             if grid[node.posx][node.posy] == BLOCKED:
                 start = path[path.index(node) - 1]
                 start = State(start.posx, start.posy, 0)
-                start.seth(prevgoalg)
                 naivegrid[node.posx][node.posy] = BLOCKED
                 break
             else:
@@ -175,6 +174,10 @@ for g in range(50):
                 if node.posx == goal.posx and node.posy == goal.posy:
                     print("Target reached.")
                     reached = True
+        for state in CLOSED:
+            state.seth(goal.g)
+            state.setg(INF)
+            state.treepointer = None
     if draw:
         win.getMouse()
         win.close()
