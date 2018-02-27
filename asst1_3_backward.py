@@ -3,7 +3,7 @@ import random
 import time
 from binary_heap import *
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -94,7 +94,7 @@ for gd in range(50):
     COST = 1
     start = State(0, 0, INF) #initialize at 0, 0, overwrite blocked if blocked, goal is 100, 100
     goal = State(100, 100, 0)
-
+    
     if draw:
         pos = Rectangle(Point(goal.posx, goal.posy), Point(goal.posx + 1, goal.posy + 1))
         pos.setFill("red")

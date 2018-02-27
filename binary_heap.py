@@ -1,20 +1,22 @@
 class MinBinaryHeap:
   def __init__(self):
-    self.array = [None] * 1000
+    self.array = [None] * 100
     self.count = 0
+    self.d = dict()
     
   def __bool__(self):
     return self.count > 0
     
   def add(self, element):
-    if element in self.array:
-        self.shift_up(self.array.index(element))
-    else:
+    if not self.d.get(element):
         if self.count == len(self.array):
           self.array += [None] * len(self.array)
         self.array[self.count] = element
         self.shift_up(self.count)
+        self.d[element] = self.count
         self.count += 1
+    else: 
+        self.shift_up(self.array.index(element))
 
   def peek(self):
     return self.array[0]
@@ -32,7 +34,9 @@ class MinBinaryHeap:
 
   def swap_elements(self, i, j):
     self.array[i], self.array[j] = self.array[j], self.array[i]
-
+   # self.d[self.array[j]] = j
+  #  self.d[self.array[i]] = i
+    
   def shift_up(self, index):
     if len(self.array) != 0:
       while index > 0 and \
@@ -60,4 +64,7 @@ class MinBinaryHeap:
     self.count -= 1
     self.swap_elements(0, self.count)
     self.shift_down(0)
-    return self.array[self.count]
+    min = self.array[self.count]
+    self.d.pop(self.array[self.count])
+    self.array[self.count] = None
+    return min

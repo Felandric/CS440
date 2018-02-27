@@ -3,7 +3,7 @@ import random
 import time
 from binary_heap import *
 
-draw = True #set whether or not to draw the grid
+draw = False #set whether or not to draw the grid
 
 UNVISITED = 0
 UNBLOCKED = 1
@@ -101,7 +101,6 @@ for gd in range(50):
 
         searchgrid[goal.posx][goal.posy] = goal
         while OPEN and (goal.g == INF or goal.g > OPEN.peek().f):
-
             current = OPEN.pop()
             succs = list()
             if current.posx + 1 < 101 and (current.treepointer == None or current.treepointer.posx != current.posx + 1) and naivegrid[current.posx + 1][current.posy] != BLOCKED: #check all possible moves without backtracking, hitting walls, or going to blocked paths
